@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
-public class TrainStation {
+public class TrainStation implements Runnable {
 	
 	String name;
 	
-	List<Passenger> passengers;
+	List<Passenger> passengers; //TODO take care of parallelism
 	
 	public TrainStation(String name) {
 		this.name = name;
@@ -17,5 +18,23 @@ public class TrainStation {
 	public String toString() {
 		return name.substring(0, 4);
 	}
-	
+
+	@Override
+	public void run() {
+		while(!Thread.interrupted()){
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			for (int i = 0; i < new Random().nextInt(Control.MAX_NUMBER_PASSENGERS_GENERATED); i++) {
+				generatePassenger();
+			}
+		}
+	}
+
+	private void generatePassenger() {
+		TrainStation destination = Control.stations.get(new Random().nextInt(Control.stations.size()));
+		passengers.add(new Passenger(this, destination));
+	}
 }

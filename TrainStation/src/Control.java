@@ -2,27 +2,32 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Control implements Runnable {
-	
-	List<TrainStation> stations;
-	
+
+	public static List<TrainStation> stations;
+
 	List<Track> tracks;
-	
+
 	List<Train> trains;
-	
-	Thread passengersGenerator;
-	
-	public static final int numberSeats = 300;
-	
+
+	public static final int NUMBER_SEATS = 300;
+
+	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 300;
+
+	public static final int TRAVEL_TIME = 10000;
+
+	private List<Thread> threads;
+
 	public Control() {
 		initStations();
 		initTracks();
 		initTrains();
+		initThreads();
 	}
 
 	private void initTrains() {
 		trains = new ArrayList<Train>();
 		for (Track track : tracks) {
-			trains.add(new Train(numberSeats, track, track.location1));
+			trains.add(new Train(NUMBER_SEATS, track, track.location1));
 		}
 	}
 
@@ -33,10 +38,10 @@ public class Control implements Runnable {
 			for (TrainStation station2 : stations) {
 				alreadyExist = false;
 				for (Track track : tracks) {
-					if(track.compareTrack(station1, station2))
-						alreadyExist=true;
+					if (track.compareTrack(station1, station2))
+						alreadyExist = true;
 				}
-				if(!alreadyExist)
+				if (!alreadyExist)
 					tracks.add(new Track(station1, station2));
 			}
 		}
@@ -54,9 +59,37 @@ public class Control implements Runnable {
 		stations.add(new TrainStation("Syracuse"));
 	}
 
+	private void initThreads() {
+		threads = new ArrayList<Thread>();
+		for (TrainStation station : stations) {
+			threads.add(new Thread(station));
+		}
+		for (Train train : trains) {
+			threads.add(new Thread(train));
+		}
+	}
+
+	private void startThreads() {
+		for (Thread thread : threads) {
+			thread.start();
+		}
+	}
+
+	private void interruptAllThreads() {
+		for (Thread thread : threads) {
+			thread.interrupt();
+		}
+	}
+
 	@Override
 	public void run() {
-		
+		startThreads();
+		while (true) {
+			if (Thread.interrupted()) {
+				interruptAllThreads();
+				break;
+			}
+		}
 	}
-	
+
 }

@@ -8,7 +8,7 @@ public class Train implements Runnable {
 	}
 
 	String name;
-	
+
 	List<Seat> seats;
 
 	TrainState state;
@@ -16,6 +16,8 @@ public class Train implements Runnable {
 	Track track;
 
 	TrainStation currentStation;
+
+	boolean start;
 
 	public Train(int numberSeats, Track track, TrainStation currentStation) {
 		seats = new ArrayList<Seat>();
@@ -25,11 +27,21 @@ public class Train implements Runnable {
 		this.track = track;
 		this.currentStation = currentStation;
 		name = track.toString();
+		start = false;
 		state = TrainState.stopped;
 	}
 
+	@Override
+	public void run() {
+		while (!Thread.interrupted()) {
+			embark();
+			travel();
+			disembark();
+		}
+	}
+
 	public boolean isReadyToDepart() {
-		return state == TrainState.stopped && occupedSeats() == Control.numberSeats;
+		return (state == TrainState.stopped && occupedSeats() == Control.NUMBER_SEATS) || start;
 	}
 
 	public int occupedSeats() {
@@ -41,18 +53,50 @@ public class Train implements Runnable {
 		return counter;
 	}
 
-	public boolean disembark() {
+	public void disembark() {
 		if (state == TrainState.stopped)
 			for (Seat seat : seats) {
-				if (seat.passenger.hasArrived())
-					seats.iterator().remove();
+				if (seat.isOccuped())
+					if (seat.passenger.hasArrived())
+						seat.passenger = null;
 			}
-		return state == TrainState.stopped;
 	}
 
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub	
+	public void embark() {
+		if (state == TrainState.stopped)
+			for (Passenger passenger : new ArrayList<>(currentStation.passengers)) {
+				if (passenger.destination.equals(getTrainDestination())) {
+					for (Seat seat : seats) {
+						if (!seat.isOccuped()) {
+							seat.passenger = passenger;
+							currentStation.passengers.remove(passenger);
+						}
+					}
+					start = isReadyToDepart();
+				}
+			}
+	}
+
+	private void travel() {
+		if (start) {
+			state = TrainState.motion;
+			track.busy = true;
+			try {
+				Thread.sleep(Control.TRAVEL_TIME);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			currentStation = getTrainDestination();
+			track.busy = false;
+			start = false;
+			state = TrainState.stopped;
+		}
+	}
+
+	TrainStation getTrainDestination() {
+		if (currentStation.equals(track.location1))
+			return track.location2;
+		return track.location1;
 	}
 
 }
