@@ -4,7 +4,7 @@ import java.util.List;
 public class Train implements Runnable {
 
 	public static enum TrainState {
-		boarding, stopped, motion, departing
+		boarding, disembark, stopped, motion, departing, arriving
 	}
 
 	String name;
@@ -33,15 +33,31 @@ public class Train implements Runnable {
 
 	@Override
 	public void run() {
+		state = TrainState.stopped;
+		waitFor(Control.ARRIVING_TIME);
 		while (!Thread.interrupted()) {
-			embark();
-			travel();
-			disembark();
+			state = TrainState.boarding;
+			waitFor(Control.BOARDING_TIME);
+			board();
+			if (isReadyToDepart()) {
+				state = TrainState.departing;
+				waitFor(Control.DEPARTING_TIME);
+				state = TrainState.motion;
+				waitFor(Control.TRAVEL_TIME);
+				travel();
+				state = TrainState.arriving;
+				waitFor(Control.ARRIVING_TIME);
+				state = TrainState.disembark;
+				waitFor(Control.DISEMBARK_TIME);
+				disembark();
+				state = TrainState.stopped;
+				waitFor(Control.STOPPING_TIME);
+			}
 		}
 	}
 
 	public boolean isReadyToDepart() {
-		return (state == TrainState.stopped && occupedSeats() == Control.NUMBER_SEATS) || start;
+		return ((state == TrainState.stopped || state == TrainState.boarding) && occupedSeats() == Control.NUMBER_SEATS) || start;
 	}
 
 	public int occupedSeats() {
@@ -54,16 +70,18 @@ public class Train implements Runnable {
 	}
 
 	public void disembark() {
-		if (state == TrainState.stopped)
+		if (state == TrainState.disembark || state == TrainState.stopped) {
 			for (Seat seat : seats) {
 				if (seat.isOccuped())
-					if (seat.passenger.hasArrived())
+					if (seat.passenger.hasArrived(currentStation))
 						seat.passenger = null;
 			}
+			start = false;
+		}
 	}
 
-	public void embark() {
-		if (state == TrainState.stopped)
+	public void board() {
+		if (state == TrainState.boarding || state == TrainState.stopped) {
 			synchronized (currentStation.passengers) {
 				for (Passenger passenger : new ArrayList<>(currentStation.passengers)) {
 					if (passenger.destination.equals(getTrainDestination())) {
@@ -73,32 +91,33 @@ public class Train implements Runnable {
 								currentStation.passengers.remove(passenger);
 							}
 						}
-						start = isReadyToDepart();
 					}
+					start = isReadyToDepart();
 				}
 			}
+		}
 	}
 
 	private void travel() {
-		if (start) {
-			state = TrainState.motion;
-			track.busy = true;
-			try {
-				Thread.sleep(Control.TRAVEL_TIME);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			currentStation = getTrainDestination();
-			track.busy = false;
-			start = false;
-			state = TrainState.stopped;
-		}
+		state = TrainState.motion;
+		track.busy = true;
+		currentStation = getTrainDestination();
+		track.busy = false;
+		start = false;
 	}
 
 	TrainStation getTrainDestination() {
 		if (currentStation.equals(track.location1))
 			return track.location2;
 		return track.location1;
+	}
+
+	public void waitFor(long time) {
+		try {
+			Thread.sleep(time);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

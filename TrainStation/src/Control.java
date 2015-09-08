@@ -9,11 +9,23 @@ public class Control implements Runnable {
 
 	List<Train> trains;
 
-	public static final int NUMBER_SEATS = 100;
+	public static final int NUMBER_SEATS = 500;
 
-	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 200;
+	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 100;
 
-	public static final int TRAVEL_TIME = 2000;
+	public static final int TRAVEL_TIME = 3000;
+
+	public static final int BOARDING_TIME = 2000;
+
+	public static final int DISEMBARK_TIME = 2000;
+	
+	public static final int DEPARTING_TIME = 1000;
+	
+	public static final int ARRIVING_TIME = 1000;
+	
+	public static final int STOPPING_TIME = 2000;
+	
+	public static volatile int counterPassengers = 0;
 
 	private List<Thread> threads;
 
@@ -53,12 +65,12 @@ public class Control implements Runnable {
 		stations = new ArrayList<TrainStation>();
 		stations.add(new TrainStation("Oswego"));
 		stations.add(new TrainStation("NYC"));
-//		stations.add(new TrainStation("Albany"));
-//		stations.add(new TrainStation("Buffalo"));
-//		stations.add(new TrainStation("Niagara Falls"));
-//		stations.add(new TrainStation("Plattsburgh"));
-//		stations.add(new TrainStation("Rochester"));
-//		stations.add(new TrainStation("Syracuse"));
+		stations.add(new TrainStation("Albany"));
+		stations.add(new TrainStation("Buffalo"));
+		stations.add(new TrainStation("Niagara Falls"));
+		stations.add(new TrainStation("Plattsburgh"));
+		stations.add(new TrainStation("Rochester"));
+		stations.add(new TrainStation("Syracuse"));
 	}
 
 	private void initThreads() {

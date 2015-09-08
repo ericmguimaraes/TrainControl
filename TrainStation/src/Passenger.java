@@ -1,24 +1,21 @@
 
 public class Passenger {
-	
-	TrainStation currentStation;
-	
+
 	TrainStation destination;
-	
+
 	boolean waiting;
-	
-	public Passenger(TrainStation currentStation, TrainStation destination) {
-		this.currentStation = currentStation;
+
+	public Passenger(TrainStation destination) {
 		this.destination = destination;
 		waiting = true;
 	}
 
-	boolean hasArrived(){
+	boolean hasArrived(TrainStation currentStation) {
 		return currentStation.equals(destination);
 	}
-	
-	boolean isWaiting(){
+
+	boolean isWaiting() {
 		return waiting;
 	}
-	
+
 }

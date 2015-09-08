@@ -1,19 +1,19 @@
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-
 public class TrainStation implements Runnable {
-	
+
 	String name;
-	
-	volatile List<Passenger> passengers; //TODO take care of parallelism
-	
+
+	volatile List<Passenger> passengers; // TODO take care of parallelism
+
 	public TrainStation(String name) {
 		this.name = name;
-		passengers = new ArrayList<Passenger>();
+		passengers = Collections.synchronizedList(new ArrayList<Passenger>());
 	}
-	
+
 	@Override
 	public String toString() {
 		return name.substring(0, 3);
@@ -21,7 +21,7 @@ public class TrainStation implements Runnable {
 
 	@Override
 	public void run() {
-		while(!Thread.interrupted()){
+		while (!Thread.interrupted()) {
 			try {
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
@@ -34,7 +34,10 @@ public class TrainStation implements Runnable {
 	}
 
 	private void generatePassenger() {
-		TrainStation destination = Control.stations.get(new Random().nextInt(Control.stations.size()));
-		passengers.add(new Passenger(this, destination));
+		//synchronized (Control.counterPassengers) {
+			Control.counterPassengers++;
+			TrainStation destination = Control.stations.get(new Random().nextInt(Control.stations.size()));
+			passengers.add(new Passenger(destination));
+		//}
 	}
 }
