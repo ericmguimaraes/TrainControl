@@ -7,7 +7,7 @@ public class TrainStation implements Runnable {
 	
 	String name;
 	
-	List<Passenger> passengers; //TODO take care of parallelism
+	volatile List<Passenger> passengers; //TODO take care of parallelism
 	
 	public TrainStation(String name) {
 		this.name = name;
@@ -16,7 +16,7 @@ public class TrainStation implements Runnable {
 	
 	@Override
 	public String toString() {
-		return name.substring(0, 4);
+		return name.substring(0, 3);
 	}
 
 	@Override

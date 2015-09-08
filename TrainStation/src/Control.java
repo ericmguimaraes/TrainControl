@@ -9,11 +9,11 @@ public class Control implements Runnable {
 
 	List<Train> trains;
 
-	public static final int NUMBER_SEATS = 300;
+	public static final int NUMBER_SEATS = 100;
 
-	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 300;
+	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 200;
 
-	public static final int TRAVEL_TIME = 10000;
+	public static final int TRAVEL_TIME = 2000;
 
 	private List<Thread> threads;
 
@@ -36,6 +36,8 @@ public class Control implements Runnable {
 		boolean alreadyExist;
 		for (TrainStation station1 : stations) {
 			for (TrainStation station2 : stations) {
+				if (station1.equals(station2))
+					continue;
 				alreadyExist = false;
 				for (Track track : tracks) {
 					if (track.compareTrack(station1, station2))
@@ -50,13 +52,13 @@ public class Control implements Runnable {
 	private void initStations() {
 		stations = new ArrayList<TrainStation>();
 		stations.add(new TrainStation("Oswego"));
-		stations.add(new TrainStation("New York"));
-		stations.add(new TrainStation("Albany"));
-		stations.add(new TrainStation("Buffalo"));
-		stations.add(new TrainStation("Niagara Falls"));
-		stations.add(new TrainStation("Plattsburgh"));
-		stations.add(new TrainStation("Rochester"));
-		stations.add(new TrainStation("Syracuse"));
+		stations.add(new TrainStation("NYC"));
+//		stations.add(new TrainStation("Albany"));
+//		stations.add(new TrainStation("Buffalo"));
+//		stations.add(new TrainStation("Niagara Falls"));
+//		stations.add(new TrainStation("Plattsburgh"));
+//		stations.add(new TrainStation("Rochester"));
+//		stations.add(new TrainStation("Syracuse"));
 	}
 
 	private void initThreads() {
