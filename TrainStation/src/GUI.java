@@ -1,19 +1,21 @@
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 
 public class GUI {
 
@@ -45,19 +47,18 @@ public class GUI {
 			}
 		});
 
-		
 		try {
 			Thread.sleep(500);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		createRows();
-		
-		while(true){
+
+		while (true) {
 			updateInformation();
 		}
 	}
-	
+
 	private static void createRows() {
 		for (TrainStation station : Control.stations) {
 			dtmStations.addRow(new Object[] { station.name, station.getPassengers().size() });
@@ -87,7 +88,7 @@ public class GUI {
 			dtmTrains.setValueAt(train.state, i, 1);
 			dtmTrains.setValueAt(train.currentStation.name, i, 2);
 			dtmTrains.setValueAt(train.occupedSeats(), i, 3);
-			
+			dtmTrains.fireTableCellUpdated(i, 1);
 			i++;
 		}
 	}
@@ -105,7 +106,7 @@ public class GUI {
 	private void initialize() {
 		frame = new JFrame();
 		frame.setResizable(false);
-		frame.setBounds(100, 100, 800, 600);
+		frame.setBounds(20, 100, 1264, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 
@@ -128,12 +129,12 @@ public class GUI {
 
 		panel_2 = new JPanel();
 		panel_2.setBorder(new TitledBorder(null, "Trains", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		panel_2.setBounds(207, 9, 573, 548);
+		panel_2.setBounds(207, 9, 345, 548);
 		frame.getContentPane().add(panel_2);
 		panel_2.setLayout(null);
 
 		scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBounds(6, 16, 561, 524);
+		scrollPane_1.setBounds(6, 16, 334, 524);
 		panel_2.add(scrollPane_1);
 
 		dtmTrains = new TrainTableModel();
@@ -141,6 +142,9 @@ public class GUI {
 		dtmTrains.setColumnIdentifiers(headerTrains);
 		tableTrain = new JTable();
 		tableTrain.setModel(dtmTrains);
+		tableTrain.setCellSelectionEnabled(false);
+		tableTrain.setDefaultRenderer(String.class, new ColorRenderer(tableTrain));
+		tableTrain.setRowSelectionAllowed(true);
 		scrollPane_1.setViewportView(tableTrain);
 
 		JButton btnStart = new JButton("Start");
@@ -148,6 +152,8 @@ public class GUI {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
 				int rows[] = tableTrain.getSelectedRows();
+				if (rows.length == 0)
+					JOptionPane.showMessageDialog(frame, "Please, select one or more trains to start.");
 				for (int i = 0; i < rows.length; i++) {
 					control.trains.get(rows[i]).start = true;
 				}
@@ -175,4 +181,6 @@ public class GUI {
 		controlThread.start();
 
 	}
+
+	
 }

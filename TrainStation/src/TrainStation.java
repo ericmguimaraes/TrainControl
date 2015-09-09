@@ -21,7 +21,7 @@ public class TrainStation implements Runnable {
 	public void run() {
 		while (!Thread.interrupted()) {
 			try {
-				Thread.sleep(2000);
+				Thread.sleep(4000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

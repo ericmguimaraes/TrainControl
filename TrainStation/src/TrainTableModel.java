@@ -1,14 +1,17 @@
 import javax.swing.table.DefaultTableModel;
 
 public class TrainTableModel extends DefaultTableModel {
-	
-	/**
+
+    /**
 	 * 
 	 */
-	private static final long serialVersionUID = 6004370220841924894L;
+	private static final long serialVersionUID = -472768868723156229L;
 
-	public TrainTableModel() {
-		super();
-	}
+	@Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return String.class;
+    }
+    
+    
 	
 }
