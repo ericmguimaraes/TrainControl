@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -12,6 +13,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 public class GUI {
 
@@ -58,7 +60,7 @@ public class GUI {
 	
 	private static void createRows() {
 		for (TrainStation station : Control.stations) {
-			dtmStations.addRow(new Object[] { station.name, station.passengers.size() });
+			dtmStations.addRow(new Object[] { station.name, station.getPassengers().size() });
 		}
 		for (Train train : control.trains) {
 			dtmTrains.addRow(new Object[] { train.name, train.state, train.currentStation.name, train.occupedSeats() });
@@ -74,7 +76,7 @@ public class GUI {
 	private static void updateStationsTable() {
 		int i = 0;
 		for (TrainStation station : Control.stations) {
-			dtmStations.setValueAt(station.passengers.size(), i, 1);
+			dtmStations.setValueAt(station.getPassengers().size(), i, 1);
 			i++;
 		}
 	}
@@ -134,7 +136,7 @@ public class GUI {
 		scrollPane_1.setBounds(6, 16, 561, 524);
 		panel_2.add(scrollPane_1);
 
-		dtmTrains = new DefaultTableModel(0, 0);
+		dtmTrains = new TrainTableModel();
 		String headerTrains[] = new String[] { "Train", "State", "Last Location", "Passengers" };
 		dtmTrains.setColumnIdentifiers(headerTrains);
 		tableTrain = new JTable();
@@ -145,7 +147,10 @@ public class GUI {
 		btnStart.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-
+				int rows[] = tableTrain.getSelectedRows();
+				for (int i = 0; i < rows.length; i++) {
+					control.trains.get(rows[i]).start = true;
+				}
 			}
 		});
 		btnStart.setBounds(26, 464, 165, 35);

@@ -9,9 +9,9 @@ public class Control implements Runnable {
 
 	List<Train> trains;
 
-	public static final int NUMBER_SEATS = 500;
+	public static final int NUMBER_SEATS = 200;
 
-	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 100;
+	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 2000;
 
 	public static final int TRAVEL_TIME = 3000;
 

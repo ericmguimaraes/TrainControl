@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Train implements Runnable {
 
@@ -34,7 +35,7 @@ public class Train implements Runnable {
 	@Override
 	public void run() {
 		state = TrainState.stopped;
-		waitFor(Control.ARRIVING_TIME);
+		waitFor(new Random().nextInt(Control.STOPPING_TIME) * 4);
 		while (!Thread.interrupted()) {
 			state = TrainState.boarding;
 			waitFor(Control.BOARDING_TIME);
@@ -51,13 +52,14 @@ public class Train implements Runnable {
 				waitFor(Control.DISEMBARK_TIME);
 				disembark();
 				state = TrainState.stopped;
-				waitFor(Control.STOPPING_TIME);
+				waitFor(new Random().nextInt(Control.STOPPING_TIME));
 			}
 		}
 	}
 
 	public boolean isReadyToDepart() {
-		return ((state == TrainState.stopped || state == TrainState.boarding) && occupedSeats() == Control.NUMBER_SEATS) || start;
+		return ((state == TrainState.stopped || state == TrainState.boarding) && occupedSeats() == Control.NUMBER_SEATS)
+				|| start;
 	}
 
 	public int occupedSeats() {
@@ -82,15 +84,20 @@ public class Train implements Runnable {
 
 	public void board() {
 		if (state == TrainState.boarding || state == TrainState.stopped) {
-			synchronized (currentStation.passengers) {
-				for (Passenger passenger : new ArrayList<>(currentStation.passengers)) {
+			synchronized (currentStation.getPassengers()) {
+				for (Passenger passenger : currentStation.getPassengers()) {
 					if (passenger.destination.equals(getTrainDestination())) {
+						boolean found = false;
 						for (Seat seat : seats) {
 							if (!seat.isOccuped()) {
-								seat.passenger = passenger;
-								currentStation.passengers.remove(passenger);
+								if (currentStation.removerPassenger(passenger)) {
+									seat.passenger = passenger;
+								}
+								found = true;
 							}
 						}
+						if (!found)
+							break;
 					}
 					start = isReadyToDepart();
 				}
