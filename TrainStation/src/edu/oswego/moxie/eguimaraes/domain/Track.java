@@ -1,11 +1,12 @@
+package edu.oswego.moxie.eguimaraes.domain;
 
 public class Track {
 
 	Boolean busy;
 
-	TrainStation location1;
+	public TrainStation location1;
 
-	TrainStation location2;
+	public TrainStation location2;
 
 	public Track(TrainStation location1, TrainStation location2) {
 		this.location1 = location1;
@@ -13,7 +14,7 @@ public class Track {
 		busy = false;
 	}
 
-	boolean compareTrack(TrainStation station1, TrainStation station2) {
+	public boolean compareTrack(TrainStation station1, TrainStation station2) {
 		if ((station1.equals(location1) && station2.equals(location2))
 				|| (station2.equals(location1) && station1.equals(location2)))
 			return true;

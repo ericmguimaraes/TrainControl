@@ -1,7 +1,6 @@
+package edu.oswego.moxie.eguimaraes.GUI;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -14,8 +13,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+
+import edu.oswego.moxie.eguimaraes.animation.Board;
+import edu.oswego.moxie.eguimaraes.control.Control;
+import edu.oswego.moxie.eguimaraes.domain.Train;
+import edu.oswego.moxie.eguimaraes.domain.TrainStation;
 
 public class GUI {
 
@@ -61,10 +64,10 @@ public class GUI {
 
 	private static void createRows() {
 		for (TrainStation station : Control.stations) {
-			dtmStations.addRow(new Object[] { station.name, station.getPassengers().size() });
+			dtmStations.addRow(new Object[] { station.getName(), station.getPassengers().size() });
 		}
 		for (Train train : control.trains) {
-			dtmTrains.addRow(new Object[] { train.name, train.state, train.currentStation.name, train.occupedSeats() });
+			dtmTrains.addRow(new Object[] { train.getName(), train.getState(), train.getCurrentStation().getName(), train.occupedSeats() });
 		}
 	}
 
@@ -85,8 +88,8 @@ public class GUI {
 	private static void updateTrainTable() {
 		int i = 0;
 		for (Train train : control.trains) {
-			dtmTrains.setValueAt(train.state, i, 1);
-			dtmTrains.setValueAt(train.currentStation.name, i, 2);
+			dtmTrains.setValueAt(train.getState(), i, 1);
+			dtmTrains.setValueAt(train.getCurrentStation().getName(), i, 2);
 			dtmTrains.setValueAt(train.occupedSeats(), i, 3);
 			dtmTrains.fireTableCellUpdated(i, 1);
 			i++;
@@ -155,7 +158,7 @@ public class GUI {
 				if (rows.length == 0)
 					JOptionPane.showMessageDialog(frame, "Please, select one or more trains to start.");
 				for (int i = 0; i < rows.length; i++) {
-					control.trains.get(rows[i]).start = true;
+					control.trains.get(rows[i]).setStart(true);
 				}
 			}
 		});
@@ -177,10 +180,12 @@ public class GUI {
 		textFieldAVG.setBounds(97, 12, 86, 20);
 		panel.add(textFieldAVG);
 		textFieldAVG.setColumns(10);
+		
+		JPanel animation_panel = new Board(control);
+		animation_panel.setBounds(562, 9, 686, 548);
+		frame.getContentPane().add(animation_panel);
 
 		controlThread.start();
 
 	}
-
-	
 }

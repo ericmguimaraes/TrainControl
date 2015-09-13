@@ -1,3 +1,4 @@
+package edu.oswego.moxie.eguimaraes.GUI;
 import javax.swing.table.DefaultTableModel;
 
 public class TrainTableModel extends DefaultTableModel {

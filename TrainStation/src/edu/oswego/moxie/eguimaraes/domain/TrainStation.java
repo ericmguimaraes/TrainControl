@@ -1,13 +1,19 @@
+package edu.oswego.moxie.eguimaraes.domain;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class TrainStation implements Runnable {
+import edu.oswego.moxie.eguimaraes.control.Control;
 
-	String name;
+public class TrainStation extends GraphicElement implements Runnable {
+
+	private static final String IMAGE_LOCATION = "img/train_station.png";
+
+	private String name;
 
 	private volatile CopyOnWriteArrayList<Passenger> passengers; // TODO take care of parallelism
 
 	public TrainStation(String name) {
+		super(IMAGE_LOCATION);
 		this.name = name;
 		passengers = new CopyOnWriteArrayList<Passenger>();
 	}
@@ -21,7 +27,7 @@ public class TrainStation implements Runnable {
 	public void run() {
 		while (!Thread.interrupted()) {
 			try {
-				Thread.sleep(4000);
+				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -55,7 +61,21 @@ public class TrainStation implements Runnable {
 		}
 	}
 	
-	CopyOnWriteArrayList<Passenger> getPassengers(){
+	public CopyOnWriteArrayList<Passenger> getPassengers(){
 		return passengers;
 	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setPassengers(CopyOnWriteArrayList<Passenger> passengers) {
+		this.passengers = passengers;
+	}
+	
+	
 }

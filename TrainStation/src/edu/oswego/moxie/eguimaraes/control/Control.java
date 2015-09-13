@@ -1,5 +1,13 @@
+package edu.oswego.moxie.eguimaraes.control;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import edu.oswego.moxie.eguimaraes.animation.Board;
+import edu.oswego.moxie.eguimaraes.domain.Track;
+import edu.oswego.moxie.eguimaraes.domain.Train;
+import edu.oswego.moxie.eguimaraes.domain.TrainStation;
 
 public class Control implements Runnable {
 
@@ -7,24 +15,24 @@ public class Control implements Runnable {
 
 	List<Track> tracks;
 
-	List<Train> trains;
+	public List<Train> trains;
 
 	public static final int NUMBER_SEATS = 50;
 
-	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 2000;
+	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 1500;
 
-	public static final int TRAVEL_TIME = 3000;
+	public static final int TRAVEL_TIME = 5000;
 
 	public static final int BOARDING_TIME = 2000;
 
 	public static final int DISEMBARK_TIME = 2000;
-	
+
 	public static final int DEPARTING_TIME = 1000;
-	
+
 	public static final int ARRIVING_TIME = 1000;
-	
+
 	public static final int STOPPING_TIME = 2000;
-	
+
 	public static volatile int counterPassengers = 0;
 
 	private List<Thread> threads;
@@ -39,7 +47,7 @@ public class Control implements Runnable {
 	private void initTrains() {
 		trains = new ArrayList<Train>();
 		for (Track track : tracks) {
-			trains.add(new Train(NUMBER_SEATS, track, track.location1));
+			trains.add(new Train(NUMBER_SEATS, track, new Random().nextInt(2)%2==0?track.location1:track.location2));
 		}
 	}
 
@@ -105,5 +113,48 @@ public class Control implements Runnable {
 			}
 		}
 	}
+
+	public void loadImages() {
+		for (TrainStation station : stations) {
+			station.loadImage();
+		}
+		for (Train train : trains) {
+			train.loadImage();
+		}
+	}
+
+	public void initStartLocations() {
+		initStationLocations();
+		initTrainLocations();
+	}
+
+	private void initTrainLocations() {
+		for (Train train : trains) {
+			train.setX(train.getCurrentStation().getX());
+			train.setY(train.getCurrentStation().getY());
+			train.upgradeDirection();
+		}
+	}
+
+	private void initStationLocations() {
+		int numberOfStations = stations.size();
+		int baseDistance = (Board.WIDTH / numberOfStations) / 2;
+		int i = 0, j = 1;
+		for (TrainStation station : stations) {
+			station.setX((baseDistance * j * 4) - (baseDistance * 2 + 20));
+			if (i % 2 == 0) {
+				station.setY(Board.HEIGHT / 3 / 2);
+			} else {
+				station.setY((Board.HEIGHT / 3 / 2) * 4);
+				j++;
+			}
+			i++;
+		}
+		for (Train train : trains) {
+			train.loadImage();
+		}
+	}
+	
+	
 
 }

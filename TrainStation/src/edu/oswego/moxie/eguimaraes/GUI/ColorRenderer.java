@@ -1,9 +1,12 @@
+package edu.oswego.moxie.eguimaraes.GUI;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+
+import edu.oswego.moxie.eguimaraes.domain.Train;
 
 public class ColorRenderer extends DefaultTableCellRenderer {
 		
