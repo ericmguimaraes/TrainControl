@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import edu.oswego.moxie.eguimaraes.animation.Board;
+import edu.oswego.moxie.eguimaraes.concurrent.SynchronizedInt;
 import edu.oswego.moxie.eguimaraes.domain.Track;
 import edu.oswego.moxie.eguimaraes.domain.Train;
 import edu.oswego.moxie.eguimaraes.domain.TrainStation;
@@ -19,7 +20,9 @@ public class Control implements Runnable {
 
 	public static final int NUMBER_SEATS = 50;
 
-	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 1500;
+	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 250;
+
+	public final static int LINE_CAPACITY = 150;
 
 	public static final int TRAVEL_TIME = 5000;
 
@@ -33,11 +36,14 @@ public class Control implements Runnable {
 
 	public static final int STOPPING_TIME = 2000;
 
-	public static volatile int counterPassengers = 0;
+	public static final long PASSENGER_GENERATION_TIME = 5; //seconds
+
+	public static volatile SynchronizedInt counterPassengers;
 
 	private List<Thread> threads;
 
 	public Control() {
+		counterPassengers = new SynchronizedInt(0);
 		initStations();
 		initTracks();
 		initTrains();
@@ -47,7 +53,8 @@ public class Control implements Runnable {
 	private void initTrains() {
 		trains = new ArrayList<Train>();
 		for (Track track : tracks) {
-			trains.add(new Train(NUMBER_SEATS, track, new Random().nextInt(2)%2==0?track.location1:track.location2));
+			trains.add(new Train(NUMBER_SEATS, track,
+					new Random().nextInt(2) % 2 == 0 ? track.location1 : track.location2));
 		}
 	}
 
@@ -73,12 +80,27 @@ public class Control implements Runnable {
 		stations = new ArrayList<TrainStation>();
 		stations.add(new TrainStation("Oswego"));
 		stations.add(new TrainStation("NYC"));
+		
 		stations.add(new TrainStation("Albany"));
 		stations.add(new TrainStation("Buffalo"));
+		
 		stations.add(new TrainStation("Niagara Falls"));
 		stations.add(new TrainStation("Plattsburgh"));
+		
 		stations.add(new TrainStation("Rochester"));
 		stations.add(new TrainStation("Syracuse"));
+		
+		stations.add(new TrainStation("San Diego"));
+		stations.add(new TrainStation("Barbara"));
+		
+		stations.add(new TrainStation("Los Angeles"));
+		stations.add(new TrainStation("Sacramento"));
+		
+		stations.add(new TrainStation("Miami"));
+		stations.add(new TrainStation("Chicago"));
+		
+		stations.add(new TrainStation("Boston"));
+		stations.add(new TrainStation("Philladelphia"));
 	}
 
 	private void initThreads() {
@@ -132,7 +154,6 @@ public class Control implements Runnable {
 		for (Train train : trains) {
 			train.setX(train.getCurrentStation().getX());
 			train.setY(train.getCurrentStation().getY());
-			train.upgradeDirection();
 		}
 	}
 
@@ -154,7 +175,5 @@ public class Control implements Runnable {
 			train.loadImage();
 		}
 	}
-	
-	
 
 }

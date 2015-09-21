@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import edu.oswego.moxie.eguimaraes.animation.GraphicElement;
+import edu.oswego.moxie.eguimaraes.concurrent.BoundedBuffer;
 import edu.oswego.moxie.eguimaraes.control.Control;
 
 public class Train extends GraphicElement implements Runnable {
@@ -53,13 +55,9 @@ public class Train extends GraphicElement implements Runnable {
 			if (isReadyToDepart()) {
 				state = TrainState.departing;
 				waitFor(Control.DEPARTING_TIME);
-				state = TrainState.motion;
-				waitFor(Control.TRAVEL_TIME);
 				travel();
 				state = TrainState.arriving;
 				waitFor(Control.ARRIVING_TIME);
-				state = TrainState.disembark;
-				waitFor(Control.DISEMBARK_TIME);
 				disembark();
 				state = TrainState.stopped;
 				waitFor(new Random().nextInt(Control.STOPPING_TIME));
@@ -82,43 +80,59 @@ public class Train extends GraphicElement implements Runnable {
 	}
 
 	public void disembark() {
-		if (state == TrainState.disembark || state == TrainState.stopped) {
-			for (Seat seat : seats) {
-				if (seat.isOccuped())
-					if (seat.passenger.hasArrived(currentStation))
-						seat.passenger = null;
-			}
-			start = false;
+		state = TrainState.disembark;
+		currentStation = getTrainDestination();
+		waitFor(Control.DISEMBARK_TIME);
+		for (Seat seat : seats) {
+			if (seat.isOccuped())
+				if (seat.passenger.hasArrived(currentStation))
+					seat.passenger = null;
 		}
+		start = false;
 	}
 
 	public void board() {
-		if (state == TrainState.boarding || state == TrainState.stopped) {
-			synchronized (currentStation.getPassengers()) {
-				for (Passenger passenger : currentStation.getPassengers()) {
-					if (passenger.destination.equals(getTrainDestination())) {
-						boolean found = false;
-						for (Seat seat : seats) {
-							if (!seat.isOccuped()) {
-								if (currentStation.removerPassenger(passenger)) {
-									seat.passenger = passenger;
-								}
-								found = true;
-							}
-						}
-						if (!found)
+		try {
+			if (state == TrainState.boarding || state == TrainState.stopped) {
+				boolean found = false;
+				Passenger passenger = null;
+				passenger = currentStation.getPassengers().poll(getTrainDestination(), 100);
+				while (passenger != null) {
+					found = false;
+					for (Seat seat : seats) {
+						if (!seat.isOccuped()) {
+							seat.passenger = passenger;
+							found = true;
 							break;
+						}
 					}
-					start = isReadyToDepart();
+					if (!found) {
+						currentStation.getPassengers().put(passenger);
+						break;
+					}
+					passenger = currentStation.getPassengers().poll(getTrainDestination(), 100);
 				}
 			}
+		} catch (InterruptedException e) {
+			// TODO ???
+			e.printStackTrace();
 		}
+		start = isReadyToDepart();
 	}
 
 	private void travel() {
 		state = TrainState.motion;
 		track.busy = true;
-		currentStation = getTrainDestination();
+		long initialTime = System.currentTimeMillis(), timeSpent = 0;
+		while (!updatePosition()) {
+			waitFor(100);
+			timeSpent = System.currentTimeMillis() - initialTime;
+			if (timeSpent > Control.TRAVEL_TIME) {
+				setX(getTrainDestination().getX());
+				setY(getTrainDestination().getY());
+				break;
+			}
+		}
 		track.busy = false;
 		start = false;
 	}
@@ -137,36 +151,31 @@ public class Train extends GraphicElement implements Runnable {
 		}
 	}
 
-	public void updatePosition() {
+	private boolean updatePosition() {
 		int speed = 2;
-		int x1 = track.location1.getX(), y1 = track.location1.getY(), x2 = track.location2.getX(),
-				y2 = track.location2.getY();
-		double angle = Math.atan2(y2 - y1, x2 - x1);
-		
-		
-		
-		
-		if(getTrainDestination().equals(track.location1)){
-			if (state.equals(TrainState.motion) && Math.abs(getX() - x1) > 0 && Math.abs(getY() - y1) > 0){
-				setX((int) (getX() + speed));//*Math.sin(angle)));
-				setY((int) (getY() + speed));//*Math.cos(angle)));
-			}
+		int xdiff = getX() - getTrainDestination().getX(), ydiff = getY() - getTrainDestination().getY();
+		int range = 10;
+		if (xdiff > -range && xdiff < range && ydiff > -range && ydiff < range) {
+			setX(getTrainDestination().getX());
+			setY(getTrainDestination().getY());
+			return true;
 		} else {
-			if (state.equals(TrainState.motion) && Math.abs(getX() - x2) > 0 && Math.abs(getY() - y2) > 0){
-				setX((int) (getX() - speed));//*Math.sin(angle)));
-				setY((int) (getY() - speed));//*Math.cos(angle)));
+			if (state.equals(TrainState.motion)) {
+				setY(getY() + ((ydiff > 0 ? -1 : 1) * track.getYPace(speed)));
+				setX(getX() + ((xdiff > 0 ? -1 : 1) * track.getXPace(speed)));
+				return false;
+			} else {
+				setX(getTrainDestination().getX());
+				setY(getTrainDestination().getY());
+				return true;
 			}
 		}
-	}
-
-	public void upgradeDirection() {
-		// TODO Auto-generated method stub
 	}
 
 	public double getAngle() {
 		int x1 = track.location1.getX(), y1 = track.location1.getY(), x2 = track.location2.getX(),
 				y2 = track.location2.getY();
-		double angle = Math.atan2(y2 - y1, x2 - x1);
+		double angle = Math.toRadians(90) + Math.atan2(y2 - y1, x2 - x1);
 		return angle;
 	}
 

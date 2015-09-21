@@ -74,13 +74,13 @@ public class GUI {
 	private static void updateInformation() {
 		updateTrainTable();
 		updateStationsTable();
-		textFieldAVG.setText(Integer.toString(Control.counterPassengers));
+		textFieldAVG.setText(Integer.toString(Control.counterPassengers.get()));
 	}
 
 	private static void updateStationsTable() {
 		int i = 0;
 		for (TrainStation station : Control.stations) {
-			dtmStations.setValueAt(station.getPassengers().size(), i, 1);
+			dtmStations.setValueAt(station.getNumberOfPassengers(), i, 1);
 			i++;
 		}
 	}
@@ -171,7 +171,7 @@ public class GUI {
 		frame.getContentPane().add(panel);
 		panel.setLayout(null);
 
-		JLabel lblAVG = new JLabel("AVG Throughput");
+		JLabel lblAVG = new JLabel("Num of Passengers");
 		lblAVG.setBounds(10, 15, 85, 14);
 		panel.add(lblAVG);
 

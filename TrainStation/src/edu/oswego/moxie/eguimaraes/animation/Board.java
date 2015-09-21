@@ -1,7 +1,6 @@
 package edu.oswego.moxie.eguimaraes.animation;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -58,28 +57,13 @@ public class Board extends JPanel implements Runnable {
 		draw(g, background, 0, 0);
 		for (Train train : control.trains) {
 			rotateAndDraw(train.getAngle(), g, train.getImage(), train.getX(), train.getY());
+			//draw(g, train.getImage(), train.getX(), train.getY());
 		}
 		
-		for (TrainStation station : control.stations) {
+		for (TrainStation station : Control.stations) {
 			draw(g, station.getImage(), station.getX(), station.getY());
 		}
 	}
-
-	// private void drawStar(Graphics g) {
-	// g.drawImage(star, x, y, this);
-	// Toolkit.getDefaultToolkit().sync();
-	// }
-	//
-	// private void drawGrass(Graphics g) {
-	// g.drawImage(grass, 0, 0, this);
-	// Toolkit.getDefaultToolkit().sync();
-	// }
-	//
-	//
-	// private void drawstation(Graphics g) {
-	// g.drawImage(trainStation, 200, 300, this);
-	// Toolkit.getDefaultToolkit().sync();
-	// }
 
 	private void draw(Graphics g, Image image, int x, int y) {
 		g.drawImage(image, x, y, this);
@@ -97,19 +81,9 @@ public class Board extends JPanel implements Runnable {
 	}
 
 	private void cycle() {
-
-		for (Train train : control.trains) {
-			train.updatePosition();
-		}
-
-		// x += 1;
-		// y += 1;
-		//
-		// if (y > B_HEIGHT) {
-		//
-		// y = INITIAL_Y;
-		// x = INITIAL_X;
-		// }
+//		for (Train train : control.trains) {
+//			train.updatePosition();
+//		}
 	}
 
 	@Override

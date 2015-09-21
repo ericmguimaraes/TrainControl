@@ -1,7 +1,8 @@
 package edu.oswego.moxie.eguimaraes.domain;
-import java.util.Random;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import java.util.Random;
+
+import edu.oswego.moxie.eguimaraes.animation.GraphicElement;
 import edu.oswego.moxie.eguimaraes.control.Control;
 
 public class TrainStation extends GraphicElement implements Runnable {
@@ -10,12 +11,12 @@ public class TrainStation extends GraphicElement implements Runnable {
 
 	private String name;
 
-	private volatile CopyOnWriteArrayList<Passenger> passengers; // TODO take care of parallelism
+	private Line line;
 
 	public TrainStation(String name) {
 		super(IMAGE_LOCATION);
 		this.name = name;
-		passengers = new CopyOnWriteArrayList<Passenger>();
+		line = new Line(Control.LINE_CAPACITY);
 	}
 
 	@Override
@@ -27,7 +28,7 @@ public class TrainStation extends GraphicElement implements Runnable {
 	public void run() {
 		while (!Thread.interrupted()) {
 			try {
-				Thread.sleep(5000);
+				Thread.sleep(new Random().nextInt((int) Control.PASSENGER_GENERATION_TIME)*1000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -38,31 +39,22 @@ public class TrainStation extends GraphicElement implements Runnable {
 	}
 
 	private void generatePassenger() {
-		synchronized (passengers) {
-			Control.counterPassengers++;
-			TrainStation destination;
+		TrainStation destination;
+		destination = Control.stations.get(new Random().nextInt(Control.stations.size()));
+		while (destination.equals(this)) {
 			destination = Control.stations.get(new Random().nextInt(Control.stations.size()));
-			while(destination.equals(this)){
-				destination = Control.stations.get(new Random().nextInt(Control.stations.size()));
-			}
-			passengers.add(new Passenger(destination));
+		}
+		try {
+			if(line.offer(new Passenger(destination), 0))
+				Control.counterPassengers.add(1);
+		} catch (InterruptedException e) {
+			// TODO??
+			e.printStackTrace();
 		}
 	}
-	
-	boolean addPassenger(Passenger passenger){
-		synchronized (passengers) {
-			return passengers.add(passenger);
-		}
-	}
-	
-	boolean removerPassenger(Passenger passenger){
-		synchronized (passengers) {
-			return passengers.remove(passenger);
-		}
-	}
-	
-	public CopyOnWriteArrayList<Passenger> getPassengers(){
-		return passengers;
+
+	public Line getPassengers() {
+		return line;
 	}
 
 	public String getName() {
@@ -73,9 +65,12 @@ public class TrainStation extends GraphicElement implements Runnable {
 		this.name = name;
 	}
 
-	public void setPassengers(CopyOnWriteArrayList<Passenger> passengers) {
-		this.passengers = passengers;
+	public int getNumberOfPassengers() {
+		try {
+			return line.size();
+		} catch (java.util.ConcurrentModificationException e) {
+			return 0;
+		}
 	}
-	
-	
+
 }

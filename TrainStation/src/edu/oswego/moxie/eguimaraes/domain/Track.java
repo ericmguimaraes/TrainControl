@@ -29,5 +29,13 @@ public class Track {
 	public String toString() {
 		return location1.toString()+"/"+location2.toString();
 	}
+	
+	public int getXPace(int speed){
+		return Math.abs((location1.getX()-location2.getX())/(50/speed));
+	}
+	
+	public int getYPace(int speed){
+		return Math.abs((location1.getY()-location2.getY())/(50/speed));
+	}
 
 }
