@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Random;
 
 import edu.oswego.moxie.eguimaraes.animation.GraphicElement;
-import edu.oswego.moxie.eguimaraes.concurrent.BoundedBuffer;
 import edu.oswego.moxie.eguimaraes.control.Control;
 
 public class Train extends GraphicElement implements Runnable {
