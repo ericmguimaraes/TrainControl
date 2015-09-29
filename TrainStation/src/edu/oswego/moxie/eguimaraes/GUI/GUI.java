@@ -20,6 +20,19 @@ import edu.oswego.moxie.eguimaraes.control.Control;
 import edu.oswego.moxie.eguimaraes.domain.Train;
 import edu.oswego.moxie.eguimaraes.domain.TrainStation;
 
+/*
+ * https://github.com/ericmguimaraes/TrainControl/
+ * As the name says, the Control Class controls all constants and behavior of the simulation.
+ * Each Train Station has a line of passengers with different destinations. 
+ * A line is a BoundedBuffer that permits the request of the first passenger by destination.
+ * A BoundedBuffer is a buffer that synchronize the access to a private array of objects.
+ * Each station is a thread that generate N number of passengers per S seconds.
+ * It gets the lock and offer the passenger to the line, but it can be rejected in case that the line is full for more than S seconds.
+ * When a train arrives at the station and start boarding, it request to the line the first passenger that is going to its destination.
+ * In case, that there is none, it waits for a random period of time (in specific range) and try to request a passenger again.
+ * The train request passengers until it is full or until the controller "start" the travel manually.
+ * 
+ */
 public class GUI {
 
 	private JFrame frame;

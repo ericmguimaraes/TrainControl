@@ -20,9 +20,9 @@ public class Control implements Runnable {
 
 	public static final int NUMBER_SEATS = 50;
 
-	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 250;
+	public static final int MAX_NUMBER_PASSENGERS_GENERATED = 5000;
 
-	public final static int LINE_CAPACITY = 150;
+	public final static int LINE_CAPACITY = 400;
 
 	public static final int TRAVEL_TIME = 5000;
 

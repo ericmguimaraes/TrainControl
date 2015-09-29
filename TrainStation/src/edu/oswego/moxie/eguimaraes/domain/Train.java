@@ -49,7 +49,7 @@ public class Train extends GraphicElement implements Runnable {
 		waitFor(new Random().nextInt(Control.STOPPING_TIME) * 4);
 		while (!Thread.interrupted()) {
 			state = TrainState.boarding;
-			waitFor(Control.BOARDING_TIME);
+			waitFor(new Random().nextInt(Control.BOARDING_TIME));
 			board();
 			if (isReadyToDepart()) {
 				state = TrainState.departing;

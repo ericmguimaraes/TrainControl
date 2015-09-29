@@ -8,20 +8,44 @@ public class Line extends BoundedBuffer {
 		super(capacity);
 	}
 
-	public synchronized Passenger poll(TrainStation destination, long timeout) throws InterruptedException {
+	public Passenger poll(TrainStation destination, long msecs) throws InterruptedException {
 		if (Thread.interrupted())
 			throw new InterruptedException();
+		Passenger old = null;
 		synchronized (this) {
-			Passenger result = (Passenger) poll(timeout);
-			int count = 0;
-			while (result != null && !result.destination.equals(destination) && count < size()) {
-				put(result);
-				result = (Passenger) poll(100);
+			long start = (msecs <= 0) ? 0 : System.currentTimeMillis();
+			long waitTime = msecs;
+
+			while (usedSlots_ <= 0) {
+				if (waitTime <= 0)
+					return null;
+				try {
+					wait(waitTime);
+				} catch (InterruptedException ex) {
+					notify();
+					throw ex;
+				}
+				waitTime = msecs - (System.currentTimeMillis() - start);
+			}
+			old = (Passenger) extract();
+			incEmptySlots();
+			int count = 0, limit = usedSlots_;
+			while (old != null && !old.destination.equals(destination) && count < limit) {
+				insert(old);
+				incUsedSlots();
+				old = (Passenger) extract();
+				incEmptySlots();
 				count++;
 			}
-			if (result != null && result.destination.equals(destination))
-				return result;
-			return null;
+			if (old != null && old.destination.equals(destination)) {
+				return old;
+			} else {
+				if (old != null){
+					insert(old);
+					incUsedSlots();
+				}
+				return null;
+			}
 		}
 	}
 
